@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: pyprop
+Version: 0.0.1
+Summary: Free space propagator
+Author-email: Alberto Mittone <alberto.mittone@gmail.com>
+Project-URL: Homepage, https://github.com/mittoalb/pyprop
+Project-URL: Bug Tracker, https://github.com/mittoalb/pyprop
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENCE

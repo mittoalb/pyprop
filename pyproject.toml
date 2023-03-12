@@ -1,0 +1,22 @@
+[project]
+name = "pyprop"
+version = "0.0.1"
+authors = [
+  { name="Alberto Mittone", email="alberto.mittone@gmail.com" },
+]
+description = "Free space propagator"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+[dependencies]
+pycuda = "2022.12.1"
+fabio = "2022.12.1"
+
+
+[project.urls]
+"Homepage" = "https://github.com/mittoalb/pyprop"
+"Bug Tracker" = "https://github.com/mittoalb/pyprop"
