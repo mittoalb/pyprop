@@ -1,7 +1,7 @@
-import PhaseRetrieval
-from tomopy_phase import retrieve_phase
-from PhaseRetrieval import phase_retrieval
-from utility import read_edf, write_edf, next_greater_power_of_2
+#import PhaseRetrieval
+from pyprop.tomopy_phase import retrieve_phase
+#from pyprop.PhaseRetrieval import phase_retrieval
+from pyprop.rw import *
 import numpy
 import scipy
 from scipy import signal
@@ -27,7 +27,7 @@ def PaganinPhaseRetrieval(data,px,PL):
 	NNx, NNy = data.shape
 	data = data#[(NNy-Ny)/2:(NNy+Ny)/2,(NNx-Nx)/2:(NNx+Nx)/2]
 	return data
-
+"""
 data, h  = read_edf('PropagatedWIRE30keVNoNoise2.3000m.edf')
 px = 3.1e-4
 dist = 230.
@@ -38,3 +38,4 @@ PL = 800.
 #out = PaganinPhaseRetrieval(data,px,PL)
 out = retrieve_phase(data, px, dist, energy, alpha, padding)
 write_edf('PRSum30keVWireNoNoise.edf', out)
+"""

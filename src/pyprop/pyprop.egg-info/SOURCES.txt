@@ -5,6 +5,7 @@ src/models.py
 src/paga.py
 src/propagator.py
 src/propagator_FINAL.py
+src/rw.py
 src/tomopy_phase.py
 src/pyprop.egg-info/PKG-INFO
 src/pyprop.egg-info/SOURCES.txt

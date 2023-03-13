@@ -83,9 +83,11 @@ def tester(pixel_size,energy):
 
 	fields1 = np.ones(shape=[xnpoints,ynpoints],dtype=complex)
 	wl = (12.398/energy)*1e-10
-	edf=EdfFile.EdfFile('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_beta_Sphere_3300eV_CORRECT.edf',access='r')
+	img = fabio.open('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_beta_Sphere_3300eV_CORRECT.edf')
+	
+	#edf=EdfFile.EdfFile('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_beta_Sphere_3300eV_CORRECT.edf',access='r')
 	LAC_=edf.GetData(0)
-	LAC = np.pad(LAC_,((400,400),(400,400)),'edge') #following three lines: for making image quadratic
+	LAC = np.pad(img.data,((400,400),(400,400)),'edge') #following three lines: for making image quadratic
 	edf=EdfFile.EdfFile('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_delta_Sphere_3300eV_CORRECT.edf',access='r')
 	delta_=edf.GetData(0)
 	delta = np.pad(delta_,((400,400),(400,400)),'edge')
@@ -94,7 +96,7 @@ def tester(pixel_size,energy):
 	#delta = np.pad(delta, ((1448,1449),(1448,1449)),"edge")
 	WN = (2*np.pi) / wl
 	#delta = delta*WN
-	print wl, WN
+	print(wl, WN)
 	transm = np.exp(-LAC-1j*delta*WN)
 
 	fields1 *= transm#2e-7 ->Absorption

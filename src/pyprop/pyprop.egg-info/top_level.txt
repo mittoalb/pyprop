@@ -3,4 +3,5 @@ models
 paga
 propagator
 propagator_FINAL
+rw
 tomopy_phase

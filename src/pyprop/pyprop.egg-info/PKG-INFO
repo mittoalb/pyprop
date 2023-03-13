@@ -8,6 +8,6 @@ Project-URL: Bug Tracker, https://github.com/mittoalb/pyprop
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.7
+Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 License-File: LICENCE

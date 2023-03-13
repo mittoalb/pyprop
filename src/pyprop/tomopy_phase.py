@@ -55,8 +55,8 @@ from __future__ import (absolute_import, division, print_function,
 
 import numpy as np
 #from tomopy.util.misc import (fft2, ifft2)
-from wrapper_fftw import *
-
+#from wrapper_fftw import *
+from pyprop.wrapper_fftw import *
 #import tomopy.util.mproc as mproc
 import logging
 

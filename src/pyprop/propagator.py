@@ -10,12 +10,11 @@ ADJUST:
 """
 import numpy as np
 import scipy.ndimage
-from PyMca import EdfFile
+
+from pyprop.rw import *
+
 import copy
 import random
-#from utility import write_edf
-#from utility import read_edf
-
 import fabio
 #import cupy as cp
 
@@ -94,18 +93,17 @@ class propagators:
 		Only propagate and back-fourier transform for speed reason
 	"""	
 	def fpro(self):
-		wfou_fft2 = copy.copy(self.wfou_fft)
-		wfou_fft2 *= np.exp(-1j * np.pi * self.wl * self.z * self.frq2)
-	
-		#back FT
-		#wfou_fft2 = np.fft.ifftshift(wfou_fft2)
-		propagated = np.fft.ifft2(wfou_fft2)
+		wfou_fft *= np.exp(-1j * np.pi * self.wl * self.z * self.frq2)
+
+		# back FT
+		propagated = np.fft.ifft2(wfou_fft)
 
 		fieldIntensity = np.abs(propagated)**2
-		fieldPhase = np.arctan2(np.real(propagated), \
-				       np.imag(propagated))
-		
-		#back to original size
+
+		# compute phase using np.angle
+		fieldPhase = np.angle(propagated)
+
+		# back to original size
 		fieldIntensity = self.binning(fieldIntensity)
 		fieldPhase = self.binning(fieldPhase)
 
@@ -115,14 +113,26 @@ class propagators:
 		Needs sigma and number of bins
 	"""
 	def gauss(self,sigma,nob):
-		FWHM = 2.355 * sigma
-		step = FWHM / nob
-		self.x = np.linspace(-FWHM/2.,FWHM/2.,nob)
-		val = np.zeros(nob)
-		for i in range(0,nob):
-			rr = -FWHM/2 + i*step
-			val[i] = np.exp(-rr**2/(2*sigma**2))
+		"""
+		Generates a normalized Gaussian function with the given standard deviation.
+	
+		Parameters:
+		sigma (float): The standard deviation of the Gaussian.
+		nob (int): The number of bins to use for the Gaussian.
+		step (float): The bin size to use for the Gaussian (optional). If not
+		specified, the bin size is calculated from the FWHM.
+	
+		Returns:
+		The Gaussian function, as a 1D NumPy array.
+		"""
+		fwhm = 2.355* sigma
+		if step is None:
+			step = fwhm / nob
+			x = np.arange(-nob//2, nob//2) * step
+			val = np.exp(-0.5 * (x / sigma)**2)
+			val /= np.sum(val) * step
 		return val
+
 		
 	"""
 		Gives weight
@@ -132,46 +142,80 @@ class propagators:
 		x = random.gauss(center,sigma)
 		y = np.exp(-(x-center)**2/(2*sigma**2))
 		return x, y
-	"""
+		"""
 		Not used yes, to be implemented....maybe
-	"""
+		"""
 	def beamdistribution(self,disttype,sigma,nob):
 		if disttype == "gauss":
 			self.bdistr = self.gauss(sigma,nob)
 		else:
-			print disttype, "Not supported."
+			print(disttype, "Not supported.")
+	
 	"""
 		Calculation of polychromatic beam with gauss shape
 	"""
-	def polybeam(self,field1,numberofwaves,sigma,path,radix,savefileevery):
-		step = 2.355*sigma/numberofwaves
-		weight = self.gauss(sigma,numberofwaves)
+	def polybeam(self, fields1, numberofwaves, sigma, path, radix, savefileevery):
+		# Calculate the step size between each wave
+		step = 2.355 * sigma / numberofwaves
+		
+		# Generate a weight vector that corresponds to the intensity profile of the beam
+		weight = self.gauss(sigma, numberofwaves)
+		
+		# Normalize the weight vector so that the total weight of the beam is 1
 		weight /= sum(weight)
+		
+		# Prepare the Fresnel propagation algorithm for use
 		self.preparefresnel2D(fields1)
-		#Initialize 0 field of intensity
-		self.fieldIntensity = np.zeros(shape=[len(fields1[0,:]),len(fields1[:,0])])
+		
+		# Initialize an empty 2D array to store the intensity profile of the beam as it propagates
+		self.fieldIntensity = np.zeros(shape=[len(fields1[0, :]), len(fields1[:, 0])])
+		
+		# Add the initial energy value to the total energy of the beam
 		self.E += self.x[0]
-		for n in range(0,numberofwaves):
+		
+		# Propagate the beam through each wave and update the intensity profile
+		for n in range(0, numberofwaves):
+			# Increment the energy value by the step size
 			self.E += step
+			
+			# Propagate the beam using the Fresnel propagation algorithm and get the field phase
 			tmp, fieldPhase1 = self.fpro()
-			#Update of the field
-			self.fieldIntensity += tmp*weight[n]
-			if np.mod(n,savefileevery) == 0:
-				print "# Waves: ", n + 1, "Energy value: ", self.E, "Weight: ", weight[n]
+			
+			# Update the intensity profile of the beam by adding the current wave's intensity weighted by its weight
+			self.fieldIntensity += tmp * weight[n]
+			
+			# If the current wave is a multiple of the specified save interval, print status information and save the intensity profile
+			if np.mod(n, savefileevery) == 0:
+				print("# Waves: ", n + 1, "Energy value: ", self.E, "Weight: ", weight[n])
 				outname = path + radix + str('%4.4d' % n) + ".edf"
-				saved=EdfFile.EdfFile(outname)
-				saved.WriteImage({},self.fieldIntensity, Append=0, DataType='FloatValue')
+				writedata(self.fieldIntensity, outname)
+
+
 	"""
 		MonteCarlo sum of waves
 	"""
 	def polybeamMC(self,field1,numberofevents,MD,path,radix,savefileevery):
+		"""
+		Simulate multiple photon events using a Gaussian energy distribution.
+	
+		Args:
+		fields (ndarray): The input field to simulate.
+		number_of_events (int): The number of photon events to simulate. If set to 0, the simulation runs until a certain condition is met.
+		MD (float): The distance to the detector.
+		path (str): The path to the output file.
+		radix (int): The radix of the output file.
+		save_file_every (int): The number of events to save the output file.
+	
+		Returns:
+		ndarray: The field intensity after simulating the photon events.
+		"""
 		#Check energy conservation
 		norm = np.sum(fields1)
 		self.preparefresnel2D(fields1)
 		#Initialize 0 field of intensity
-		self.fieldIntensity = np.zeros_like(field1,dtype=float)
+		self.fieldIntensity = np.zeros_like(fields1,dtype=float)
 		WLFWHM = self.peakenergy * MD
-		print self.peakenergy, WLFWHM
+		print(self.peakenergy, WLFWHM)
 		if numberofevents != 0:
 			for n in range(0,int(numberofevents)):
 				E, weight = self.gaussMC(self.peakenergy,WLFWHM)
@@ -180,27 +224,18 @@ class propagators:
 				#Update of the field
 				self.fieldIntensity += tmp*weight
 				if np.mod(n,savefileevery) == 0:
-					print "# Events: ", n+1, "Energy value: ", E, "Wavelenght:", self.wl, "Weight: ", weight
-					outname = path + radix + str('%4.4d' % n) + ".edf"					
+					print("# Events: ", n+1, "Energy value: ", E, "Wavelenght:", self.wl, "Weight: ", weight)	
 					prop = np.sum(self.fieldIntensity)
-					#self.fieldIntensity *= (norm / prop)
-					#saved=EdfFile.EdfFile(outname)
-					#saved.WriteImage({},self.fieldIntensity, Append=0, DataType='FloatValue')
-					#write_edf(outname,np.real(self.fieldIntensity))
 		else:
 			n = 0
-			while 1:
+			while True:
 				E, weight = self.gaussMC(self.peakenergy,WLFWHM)
 				self.wl = (12.398/E)*1e-10	
 				tmp, fieldPhase1 = self.fpro()
 				#Update of the field
 				self.fieldIntensity += tmp*weight
 				if np.mod(n,savefileevery) == 0:
-					print "# Events: ", n+1, "Energy value: ", E, "Wavelenght:", self.wl, "Weight: ", weight
-					outname = path + radix + str('%4.4d' % n) + ".edf"
-					#saved=EdfFile.EdfFile(outname)
-					#saved.WriteImage({},self.fieldIntensity, Append=0, DataType='FloatValue')
-					#write_edf(outname,np.real(self.fieldIntensity))
+					print("# Events: ", n+1, "Energy value: ", E, "Wavelenght:", self.wl, "Weight: ", weight)
 				n += 1
 		#Normalize
 		self.fieldIntensity /= numberofevents	
