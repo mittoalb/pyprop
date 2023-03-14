@@ -118,3 +118,17 @@ def loadMyModel(energy):
 	transm = np.exp(-beta-1j*delta)#*WN)		
 	field *= transm			
 	return field
+	
+	
+	
+def zpt():
+	import sys
+	sys.path.insert(0, '/data/id17/map/ID17_Rec/GITrepo/dev_v1.4/other/')
+	from OpticElements import createZonePlate
+	focus=2
+	energy=4
+	px=0.2e-6
+	size=[0.2e-3,0.2e-3]
+	n=16
+	field1=createZonePlate(energy,focus,n,px,size)
+	return field1	
