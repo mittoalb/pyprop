@@ -17,7 +17,7 @@ import copy
 import random
 import fabio
 from pyprop import rw
-#import cupy as cp
+from math import sqrt
 
 class propagators:
 	"""
@@ -288,6 +288,7 @@ class propagators:
 			#Update of the field
 			self.fieldIntensity += tmp*weight
 			self.TWe += weight
+			print("Summing up:", E, weight)
 
 		#Normalize
 		self.fieldIntensity /= self.TWe

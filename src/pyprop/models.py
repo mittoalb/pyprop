@@ -68,39 +68,6 @@ def testSphere(energy,size,R,pixelsize):
 	field *= transm			
 	return field, delta*WN, beta
 
-"""
-Create field for testing purposes
-"""
-def tester(pixel_size,energy):
-	xnpoints = 1200
-	ynpoints = 1200
-
-	detector_sizeX = pixel_size * xnpoints
-	detector_sizeY = pixel_size * ynpoints
-
-	position_x = np.linspace(-detector_sizeX/2,detector_sizeX/2,xnpoints)
-	position_y = np.linspace(-detector_sizeY/2,detector_sizeY/2,ynpoints)
-
-	fields1 = np.ones(shape=[xnpoints,ynpoints],dtype=complex)
-	wl = (12.398/energy)*1e-10
-	img = fabio.open('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_beta_Sphere_3300eV_CORRECT.edf')
-	
-	#edf=EdfFile.EdfFile('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_beta_Sphere_3300eV_CORRECT.edf',access='r')
-	LAC_=edf.GetData(0)
-	LAC = np.pad(img.data,((400,400),(400,400)),'edge') #following three lines: for making image quadratic
-	edf=EdfFile.EdfFile('/data/id17/inhouse/MITTONE/LINALGEBRA/simpleobject_3_volume/Projected_delta_Sphere_3300eV_CORRECT.edf',access='r')
-	delta_=edf.GetData(0)
-	delta = np.pad(delta_,((400,400),(400,400)),'edge')
-	#for NRMG: do the following padding:
-	#LAC = np.pad(LAC, ((1448,1449),(1448,1449)),"edge")
-	#delta = np.pad(delta, ((1448,1449),(1448,1449)),"edge")
-	WN = (2*np.pi) / wl
-	#delta = delta*WN
-	print(wl, WN)
-	transm = np.exp(-LAC-1j*delta*WN)
-
-	fields1 *= transm#2e-7 ->Absorption
-	return fields1	
 	
 def loadMyModel(energy):
 	wl = (12.398/30.0)*1e-10
@@ -123,7 +90,6 @@ def loadMyModel(energy):
 	
 def zpt():
 	import sys
-	sys.path.insert(0, '/data/id17/map/ID17_Rec/GITrepo/dev_v1.4/other/')
 	from OpticElements import createZonePlate
 	focus=2
 	energy=4

@@ -21,6 +21,7 @@ from scipy import signal
 from pyprop import rw
 from pyprop import propagator as pb
 from pyprop import models
+from math import sqrt
 
 #sys.path.insert(0, '/data/id17/map/ID17_Rec/GITrepo/dev_v1.4/other/')
 #import db
@@ -55,7 +56,7 @@ if __name__ == '__main__':
 	#fields1 = fields1[0:1000,0:1000]
 	#write_edf("ZPTplate.edf",fields1) #path for saving propagated intensity
 	#Polychromatic beam
-	numberofevents = 2
+	numberofevents = 200
 	MD = 1e-4
 
 	pro = pb.propagators(px_size,energy,distance,1)
@@ -66,8 +67,8 @@ if __name__ == '__main__':
 	
 
 	fieldIntensity = pro.polybeamMC(fields1,numberofevents,MD)
-	#fieldIntensity = pro.AddDetectorBlurring(20.,fieldIntensity)
-	#fieldIntensity = pro.AddDetectorNoise(500,fieldIntensity)
+	fieldIntensity = pro.AddDetectorBlurring(1.4,fieldIntensity)
+	fieldIntensity = pro.AddDetectorNoise(500,fieldIntensity)
 	name = "PropagatedWIRE30keVNoNoise" + str('%4.4f' % 2.3) + "m.tif"
 	fieldIntensity = fieldIntensity[oyps:-oyps,oxps:-oxps]
 	
