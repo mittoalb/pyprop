@@ -2,10 +2,11 @@ name: pypro
 channels:
   - conda-forge
 dependencies:
-  - python
+  - python==3.11
   - numpy
   - scipy
   - matplotlib
   - ipywidgets
   - scikit-image
   - fabio
+
