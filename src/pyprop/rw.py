@@ -1,5 +1,5 @@
 import fabio
-from libtiff import TIFF
+#from libtiff import TIFF
 import glymur
 
 
@@ -23,16 +23,18 @@ def read_tif(name):
 	"""
 	Read a tif file
 	"""
-	tif = TIFF.open(name, mode='r')
-	return tif.read_image()
+	#tif = TIFF.open(name, mode='r')
+	tif = fabio.open(name)
+	return tif.data
 	
 	
 def write_tif(name,data):
 	"""
 	Write a tif file
 	"""
-	tif = TIFF.open(name, mode='w')
-	tif.write_image(data)
+	tif = fabio.tifimage.tifimage(data=data)
+	#tif = TIFF.open(name, mode='w')
+	tif.write(name)
 	
 	
 def read_jp2(name):

@@ -41,7 +41,7 @@ def creategrid():
 
 
 """Simple Sphere"""
-def testSphere(energy,size,R,pixelsize):
+def testSphere(energy,size,R,pixelsize,deltaI,betaI):
 	#size = 200
 	from math import sin, asin
 	field = np.ones(shape=(size,size),dtype=complex)
@@ -52,16 +52,16 @@ def testSphere(energy,size,R,pixelsize):
 	#print WN
 	for i in range(0,size):
 		for j in range(0,size):
-			if sqrt((i-size/2)**2+(j-size/2)**2) < R: #Values for PMMA at 30 keV
-				rfactor = abs(sqrt((i-size/2)**2+(j-size/2)**2))
+			if np.sqrt((i-size/2)**2+(j-size/2)**2) < R: #Values for PMMA at 30 keV
+				rfactor = abs(np.sqrt((i-size/2)**2+(j-size/2)**2))
 				#print rfactor
 				tk = 2.*sin(np.pi/2.-asin(rfactor/(0.0+R)))#*thickness
 				if i==size/2 and j==size/2:
 					tk = tmp
 				tmp = tk
 				#print tk
-				delta[i,j] = 6.70778E-07 * tk * pixelsize#2.94029E-07
-				beta[i,j] = (3.39441E-10 * (4.*np.pi)/wl)*tk*pixelsize #100 um thickness1.17987E-10
+				delta[i,j] = deltaI * tk * pixelsize#2.94029E-07
+				beta[i,j] = (betaI * (4.*np.pi)/wl)*tk*pixelsize #100 um thickness1.17987E-10
 
 				
 	transm = np.exp(-beta-1j*delta*WN)		

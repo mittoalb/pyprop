@@ -74,7 +74,7 @@ class propagators:
 
 		self.kernel_coh = self.source
 		self.kernel_coh /= np.sum(self.kernel_coh) #Normalize the kernel
-		rw.write_tif("WGL-source.edf",self.kernel_coh)
+		rw.write_tif("WGL-source.tif",self.kernel_coh)
 		
 
 	def preparefresnel2D(self,dataimage):
